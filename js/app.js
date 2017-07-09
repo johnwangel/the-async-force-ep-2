@@ -153,8 +153,6 @@ function getShip() {
     filmUL.appendChild(film);
   }
   clearInput();
-
-
 }
 
 function makeError(message) {
@@ -171,3 +169,4 @@ function clearResults() {
   bodyDiv.innerHTML = '';
 }
 
+function test(){}
