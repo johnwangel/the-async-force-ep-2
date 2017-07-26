@@ -72,62 +72,42 @@ function fetchData(method, url){
           });
         break;
       case "planet":
-          row1ttl = 'Name: ';
-          row2ttl = 'Terrain: ';
-          row3ttl = 'Population: ';
-          row1val = item.name;
-          row2val = item.terrain;
-          row3val = item.population;
-          row1.innerHTML = row1ttl + row1val;
-          row2.innerHTML = row2ttl + row2val;
-          row3.innerHTML = row3ttl + row3val;
+          row1.innerHTML = `Name: ${item.name}`;
+          row2.innerHTML = `Terrain: ${item.terrain}`;
+          row3.innerHTML = `Population: ${item.population}`;
           bodyDiv.appendChild(row1);
           bodyDiv.appendChild(row2);
           bodyDiv.appendChild(row3);
-          filmUL = document.createElement('ul');
-          filmArray = item.films;
-          for (var i = 0; i < filmArray.length; i++) {
-            fetch(filmArray[i])
-            .then(response => { return response.json(); })
-            .then(filmObj => {
-              let film = document.createElement('li');
-              film.innerHTML =  filmObj.title;
-              filmUL.appendChild(film);
-              bodyDiv.appendChild(filmUL);
-            });
-          }
+          createList(item.films);
         break;
       case "ship":
-          row1ttl = 'Name: ';
-          row2ttl = 'Manufacturer: ';
-          row3ttl = 'Starship Class: ';
-          row1val = item.name;
-          row2val = item.manufacturer;
-          row3val = item.starship_class;
-          row1.innerHTML = row1ttl + row1val;
-          row2.innerHTML = row2ttl + row2val;
-          row3.innerHTML = row3ttl + row3val;
+          row1.innerHTML = `Name: ${item.name}`;
+          row2.innerHTML = `Manufacturer: ${item.manufacturer}`;
+          row3.innerHTML = `Starship Class: ${item.starship_class}`;
           bodyDiv.appendChild(row1);
           bodyDiv.appendChild(row2);
           bodyDiv.appendChild(row3);
-          filmUL = document.createElement('ul');
-          filmArray = item.films;
-          for (var i = 0; i < filmArray.length; i++) {
-            fetch(filmArray[i])
-            .then(response => { return response.json(); })
-            .then(filmObj => {
-              let film = document.createElement('li');
-              film.innerHTML =  filmObj.title;
-              filmUL.appendChild(film);
-              bodyDiv.appendChild(filmUL);
-            });
-          }
+          createList(item.films);
         break;
       default:
         return;
     }
     clearInput();
   });
+}
+
+function createList( list ){
+  for (var i = 0; i < list.length; i++) {
+    fetch(list[i])
+    .then(response => { return response.json(); })
+    .then(obj => {
+      ul = document.createElement('ul');
+      let li = document.createElement('li');
+      li.innerHTML =  obj.title;
+      ul.appendChild(li);
+      bodyDiv.appendChild(ul);
+    });
+  }
 }
 
 function makeError(message) {
