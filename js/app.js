@@ -7,17 +7,13 @@ const inputBox = document.getElementById('resourceId');
 reqButton.addEventListener('click', clickedButton);
 
 let myMethod = '';
+let indexNo = 0;
 
 function clickedButton(e){
   clearResults();
-  let num = parseInt(inputBox.value);
-  let pageNo = (function() {
-    if (num > 9) {
-      return Math.floor(num/10);
-    } else {
-      return 1;
-    }
-  })();
+  let pageNo = getIndexNo(parseInt(inputBox.value));
+  console.log(pageNo);
+
   switch (selectorBox.value) {
     case 'people':
       let peopleReq = fetchData('person', `http://swapi.co/api/people/?page=${pageNo}`);
@@ -39,10 +35,7 @@ function fetchData(method, url){
   .then( response => { return response.json(); })
   .then( data => {
     let num = parseInt(inputBox.value);
-    let location = (function() {
-      if (num > 9) { return (Math.floor(num) - (Math.floor(num/10) * 10)); }
-          else { return num; }
-    })();
+    let location = indexNo;
 
     let row1 = document.createElement('h2');
     let row2 = document.createElement('p');
@@ -86,6 +79,15 @@ function fetchData(method, url){
     }
     clearInput();
   });
+}
+
+function getIndexNo(num){
+    if (num > 9) {
+      indexNo = Math.floor(num/10);
+    } else {
+      indexNo = 1;
+    }
+    return indexNo;
 }
 
 function createList( list ){
