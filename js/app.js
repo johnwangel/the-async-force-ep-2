@@ -47,27 +47,19 @@ function fetchData(method, url){
     let row1 = document.createElement('h2');
     let row2 = document.createElement('p');
     let row3 = document.createElement('p');
-    let filmUL;
-    let filmArray;
 
     let item = data.results[location];
     let row1ttl, row2ttl, row3ttl, row1val, row2val, row3val;
     switch (myMethod) {
       case "person":
-          row1ttl = 'Name: ';
-          row2ttl = 'Gender: ';
-          row3ttl = 'Species: ';
-          row1val = item.name;
-          row2val = item.gender;
+          row1.innerHTML = `Name: ${item.name}`;
+          row2.innerHTML = `Gender: ${item.gender}`;
+          bodyDiv.appendChild(row1);
+          bodyDiv.appendChild(row2);
           fetch(item.species[0])
           .then(response => { return response.json(); })
           .then(data => {
-            row3val = data.name;
-            row1.innerHTML = row1ttl + row1val;
-            row2.innerHTML = row2ttl + row2val;
-            row3.innerHTML = row3ttl + row3val;
-            bodyDiv.appendChild(row1);
-            bodyDiv.appendChild(row2);
+            row3.innerHTML = `Species: ${data.name}`;
             bodyDiv.appendChild(row3);
           });
         break;
