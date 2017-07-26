@@ -6,6 +6,8 @@ const inputBox = document.getElementById('resourceId');
 
 reqButton.addEventListener('click', clickedButton);
 
+let myMethod = '';
+
 function clickedButton(e){
   clearResults();
   let num = parseInt(inputBox.value);
@@ -16,145 +18,116 @@ function clickedButton(e){
       return 1;
     }
   })();
-  console.log('page ', pageNo);
   switch (selectorBox.value) {
     case 'people':
-      let peopleReq = makeXHRReq('GET', getPerson, `http://swapi.co/api/people/?page=${pageNo}`);
+      let peopleReq = fetchData('person', `http://swapi.co/api/people/?page=${pageNo}`);
       break;
     case 'planets':
-      let planetReq = makeXHRReq('GET', getPlanets, `http://swapi.co/api/planets?page=${pageNo}`);
+      let planetReq = fetchData('planet', `http://swapi.co/api/planets?page=${pageNo}`);
       break;
     case 'starships':
-      let starshipReq = makeXHRReq('GET', getShip, `http://swapi.co/api/starships?page=${pageNo}`);
+      let starshipReq = fetchData('ship', `http://swapi.co/api/starships?page=${pageNo}`);
       break;
     default:
       return;
   }
 }
 
-function makeXHRReq( method, listener, url ) {
-  let req = new XMLHttpRequest();
-  req.addEventListener("load", listener);
-  req.open(method, url);
-  req.send();
-  return req;
-}
-
-function getPerson() {
-
-  let people = JSON.parse(this.response);
-  let num = parseInt(inputBox.value);
-  if( this.status !== 200 || num > people.count + 1 ){
-    makeError('Invalid ID. Please try a lower number.');
-    return;
-  }
-
-  let location = (function() {
-    if (num > 9) { return (Math.floor(num) - (Math.floor(num/10) * 10)); }
-      else { return num; }
-    })();
-  let myPerson = people.results[location];
-  let title = document.createElement('h2');
-  title.innerHTML = "Name: " + myPerson.name;
-  let gender = document.createElement('p');
-  gender.innerHTML = "Gender: " + myPerson.gender;
-  let species = document.createElement('p');
-  makeXHRReq('GET', getSpecies, myPerson.species[0]);
-
-  bodyDiv.appendChild(title);
-  bodyDiv.appendChild(gender);
-  bodyDiv.appendChild(species);
-
-  function getSpecies() {
-    obj = JSON.parse(this.response);
-    species.innerHTML =  "Species: " + obj.name;
-  }
-  clearInput();
-}
-
-function getPlanets() {
-
-  let planets = JSON.parse(this.response);
-  let num = parseInt(inputBox.value);
-  if( this.status !== 200 || num > planets.count + 1 ){
-    makeError('Invalid ID. Please try a lower number.');
-    return;
-  }
-
-  let location = (function() {
-    if (num > 9) { return (Math.floor(num) - (Math.floor(num/10) * 10)); }
-      else { return num; }
+function fetchData(method, url){
+  myMethod = method;
+  fetch(url)
+  .then( response => { return response.json(); })
+  .then( data => {
+    let num = parseInt(inputBox.value);
+    let location = (function() {
+      if (num > 9) { return (Math.floor(num) - (Math.floor(num/10) * 10)); }
+          else { return num; }
     })();
 
-  let myPlanet = planets.results[location];
-  let name = document.createElement('h2');
-  name.innerHTML = "Name: " + myPlanet.name;
-  let terrain = document.createElement('p');
-  terrain.innerHTML = "Terrain: " + myPlanet.terrain;
-  let population = document.createElement('p');
-  population.innerHTML = "Population: " + myPlanet.population;
+    let row1 = document.createElement('h2');
+    let row2 = document.createElement('p');
+    let row3 = document.createElement('p');
+    let filmUL;
+    let filmArray;
 
-  let filmUL = document.createElement('ul');
-  let filmArray = myPlanet.films;
-  for (var i = 0; i < filmArray.length; i++) {
-    makeXHRReq('GET', getFilms, filmArray[i]);
-  }
-
-  bodyDiv.appendChild(name);
-  bodyDiv.appendChild(terrain);
-  bodyDiv.appendChild(population);
-  bodyDiv.appendChild(filmUL);
-
-  function getFilms() {
-    obj = JSON.parse(this.response);
-    let film = document.createElement('li');
-    film.innerHTML =  obj.title;
-    filmUL.appendChild(film);
-  }
-  clearInput();
-}
-
-function getShip() {
-  let ships = JSON.parse(this.response);
-  let num = parseInt(inputBox.value);
-  if( this.status !== 200 || num > ships.count + 1 ){
-    makeError('Invalid ID. Please try a lower number.');
-    return;
-  }
-
-  let location = (function() {
-    if (num > 9) { return (Math.floor(num) - (Math.floor(num/10) * 10)); }
-      else { return num; }
-    })();
-
-  let myShip = ships.results[location];
-  let name = document.createElement('h2');
-  name.innerHTML = "Name: " + myShip.name;
-  let manu = document.createElement('p');
-  manu.innerHTML = "Manufacturer: " + myShip.manufacturer;
-  let starshipClass = document.createElement('p');
-  starshipClass.innerHTML = "Starship Class: " + myShip.starship_class;
-
-  let filmUL = document.createElement('ul');
-  let filmArray = myShip.films;
-  for (var i = 0; i < filmArray.length; i++) {
-    makeXHRReq('GET', getFilms, filmArray[i]);
-  }
-
-  bodyDiv.appendChild(name);
-  bodyDiv.appendChild(manu);
-  bodyDiv.appendChild(starshipClass);
-  bodyDiv.appendChild(filmUL);
-
-  function getFilms() {
-    obj = JSON.parse(this.response);
-    let film = document.createElement('li');
-    film.innerHTML =  obj.title;
-    filmUL.appendChild(film);
-  }
-  clearInput();
-
-
+    let item = data.results[location];
+    let row1ttl, row2ttl, row3ttl, row1val, row2val, row3val;
+    switch (myMethod) {
+      case "person":
+          row1ttl = 'Name: ';
+          row2ttl = 'Gender: ';
+          row3ttl = 'Species: ';
+          row1val = item.name;
+          row2val = item.gender;
+          fetch(item.species[0])
+          .then(response => { return response.json(); })
+          .then(data => {
+            row3val = data.name;
+            row1.innerHTML = row1ttl + row1val;
+            row2.innerHTML = row2ttl + row2val;
+            row3.innerHTML = row3ttl + row3val;
+            bodyDiv.appendChild(row1);
+            bodyDiv.appendChild(row2);
+            bodyDiv.appendChild(row3);
+          });
+        break;
+      case "planet":
+          row1ttl = 'Name: ';
+          row2ttl = 'Terrain: ';
+          row3ttl = 'Population: ';
+          row1val = item.name;
+          row2val = item.terrain;
+          row3val = item.population;
+          row1.innerHTML = row1ttl + row1val;
+          row2.innerHTML = row2ttl + row2val;
+          row3.innerHTML = row3ttl + row3val;
+          bodyDiv.appendChild(row1);
+          bodyDiv.appendChild(row2);
+          bodyDiv.appendChild(row3);
+          filmUL = document.createElement('ul');
+          filmArray = item.films;
+          for (var i = 0; i < filmArray.length; i++) {
+            fetch(filmArray[i])
+            .then(response => { return response.json(); })
+            .then(filmObj => {
+              let film = document.createElement('li');
+              film.innerHTML =  filmObj.title;
+              filmUL.appendChild(film);
+              bodyDiv.appendChild(filmUL);
+            });
+          }
+        break;
+      case "ship":
+          row1ttl = 'Name: ';
+          row2ttl = 'Manufacturer: ';
+          row3ttl = 'Starship Class: ';
+          row1val = item.name;
+          row2val = item.manufacturer;
+          row3val = item.starship_class;
+          row1.innerHTML = row1ttl + row1val;
+          row2.innerHTML = row2ttl + row2val;
+          row3.innerHTML = row3ttl + row3val;
+          bodyDiv.appendChild(row1);
+          bodyDiv.appendChild(row2);
+          bodyDiv.appendChild(row3);
+          filmUL = document.createElement('ul');
+          filmArray = item.films;
+          for (var i = 0; i < filmArray.length; i++) {
+            fetch(filmArray[i])
+            .then(response => { return response.json(); })
+            .then(filmObj => {
+              let film = document.createElement('li');
+              film.innerHTML =  filmObj.title;
+              filmUL.appendChild(film);
+              bodyDiv.appendChild(filmUL);
+            });
+          }
+        break;
+      default:
+        return;
+    }
+    clearInput();
+  });
 }
 
 function makeError(message) {
@@ -170,4 +143,3 @@ function clearInput() {
 function clearResults() {
   bodyDiv.innerHTML = '';
 }
-
